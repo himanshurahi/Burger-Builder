@@ -3,11 +3,30 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import axios from 'axios'
+
+
+// axios.defaults.headers.common['Authorization'] = 'Auth_token'
+
+// axios.interceptors.request.use(request => {
+//   console.log(request)
+//   return request
+// })
+
+
+// axios.interceptors.response.use(resp => {
+//   console.log(resp)
+//   return resp
+// }, error => {
+//   console.log(error)
+//   return error
+// })
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  // <React.StrictMode>
+  //   <App />
+  // </React.StrictMode>,
+  <App />,
   document.getElementById('root')
 );
 
