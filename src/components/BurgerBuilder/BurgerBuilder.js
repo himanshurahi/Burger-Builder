@@ -15,6 +15,9 @@ import Spinner from "./spinner/spinner";
 import { Link, Redirect } from "react-router-dom";
 import Checkout from "./checkout/checkout";
 
+import { connect } from "react-redux";
+import { fetchIng } from "../../ReduxPlayground/Actions/actions_creator";
+import SimpleSnackbar from "../Auth/Snackbar/Snackbar";
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -46,23 +49,24 @@ const style = {
 function BurgerBulder(props) {
   const [ing, setIng] = React.useState(null);
 
-  const [ingPrice, setIngPrice] = React.useState({
-    ing: {
-      salad: 50,
-      bacon: 100,
-      cheese: 60,
-      meat: 80,
-    },
-  });
+  //   const [ingPrice, setIngPrice] = React.useState({
+  //     ing: {
+  //       salad: 50,
+  //       bacon: 100,
+  //       cheese: 60,
+  //       meat: 80,
+  //     },
+  //   });
 
   const [dialog, Setdialog] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const [firstLoading, setFirstLoading] = React.useState(true);
+  const [firstLoading, setFirstLoading] = React.useState(false);
 
   React.useEffect(() => {
     //fetching data
     // console.log(props.match.params.id)
-    fetchData();
+    // fetchData();
+    props.fetchIng();
   }, []);
 
   //   React.useEffect(() => {
@@ -82,37 +86,36 @@ function BurgerBulder(props) {
       });
   };
 
-  const addIng = (type) => {
-    const oldCount = ing.ing[type];
-    const updatedcount = oldCount + 1;
+  //   const addIng = (type) => {
+  //     const oldCount = ing.ing[type];
+  //     const updatedcount = oldCount + 1;
 
-    const CopyIng = { ...ing };
-    CopyIng.ing[type] = updatedcount;
-    //Price
-    CopyIng.totalPrice = CopyIng.totalPrice + ingPrice.ing[type];
-    setIng(CopyIng);
-  };
+  //     const CopyIng = { ...ing };
+  //     CopyIng.ing[type] = updatedcount;
+  //     //Price
+  //     CopyIng.totalPrice = CopyIng.totalPrice + ingPrice.ing[type];
+  //     setIng(CopyIng);
+  //   };
 
-  const removeIng = (type) => {
-    const oldCount = ing.ing[type];
-    const updatedcount = oldCount - 1;
+  //   const removeIng = (type) => {
+  //     const oldCount = ing.ing[type];
+  //     const updatedcount = oldCount - 1;
 
-    const CopyIng = { ...ing };
-    CopyIng.ing[type] = updatedcount;
-    CopyIng.totalPrice = CopyIng.totalPrice - ingPrice.ing[type];
-    setIng(CopyIng);
-  };
+  //     const CopyIng = { ...ing };
+  //     CopyIng.ing[type] = updatedcount;
+  //     CopyIng.totalPrice = CopyIng.totalPrice - ingPrice.ing[type];
+  //     setIng(CopyIng);
+  //   };
 
   const MakeOrder = () => {
-    console.log("make order");
     // setLoading(true);
-    const order = {
-      ing: ing.ing,
-      totalPrice: ing.totalPrice,
-    };
+    // const order = {
+    //   ing: ing.ing,
+    //   totalPrice: ing.totalPrice,
+    // };
     props.history.push({
       pathname: "/checkout",
-      state: ing,
+      //   state: ing,
     });
 
     // <Redirect to = {{pathname : '/checkout'}} ></Redirect>
@@ -135,14 +138,15 @@ function BurgerBulder(props) {
 
   return (
     <Container maxWidth="lg" style={{ marginTop: "20px" }}>
-      {firstLoading ? (
+      
+      {props.ing.loading ? (
         <Spinner />
       ) : (
         <div>
           <Grid container justify="center" alignItems="center">
             <Grid item lg={6} sm={6} xs={12}>
               <Paper className={classes.paper} elevation={3}>
-                <Burger ing={ing} />
+                <Burger ing={props.ing} />
               </Paper>
             </Grid>
           </Grid>
@@ -152,7 +156,7 @@ function BurgerBulder(props) {
               className={classes.paper}
               style={{ display: "flex", justifyContent: "center" }}
             >
-              <h3>Total Cost : {ing.totalPrice} ₹</h3>
+              <h3>Total Cost : {props.ing.totalPrice} ₹</h3>
             </Paper>
           </Grid>
           <Grid
@@ -162,7 +166,11 @@ function BurgerBulder(props) {
             style={{ marginBottom: "10%" }}
             spacing={0}
           >
-            <BuildControls addIng={addIng} removeIng={removeIng} ing={ing} />
+            <BuildControls
+              //   addIng={addIng}
+              //   removeIng={removeIng}
+              ing={props.ing}
+            />
 
             <Grid item xs={12} lg={12} sm={12}>
               <Paper
@@ -173,7 +181,7 @@ function BurgerBulder(props) {
                   variant="contained"
                   color="primary"
                   style={{ height: "50%", top: "10px", marginBottom: "10%" }}
-                  disabled={ing.totalPrice === 0}
+                  disabled={props.ing.totalPrice === 0}
                   onClick={() => Setdialog(true)}
                 >
                   Checkout
@@ -183,7 +191,7 @@ function BurgerBulder(props) {
           </Grid>
           <MyDialog
             open={dialog}
-            total={ing}
+            total={props.ing}
             close={() => Setdialog(false)}
             makeorder={MakeOrder}
             loading={loading}
@@ -194,4 +202,14 @@ function BurgerBulder(props) {
   );
 }
 
-export default BurgerBulder;
+const mapStateToProps = (state) => {
+  return { ing: state.burger };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    fetchIng: () => dispatch(fetchIng()),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(BurgerBulder);

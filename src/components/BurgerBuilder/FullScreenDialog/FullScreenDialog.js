@@ -33,7 +33,6 @@ function MyFullScreenDialog(props) {
 
   const onSubmit = (data) => {
     let finalData = { ...props.ing, ...data };
-    
   };
 
   return (
@@ -112,7 +111,7 @@ function MyFullScreenDialog(props) {
               onBlur={onBlurHandler}
             />
           </form> */}
-          <Basic data = {props.ing}  />
+          <Basic />
         </Container>
       </Dialog>
     </div>

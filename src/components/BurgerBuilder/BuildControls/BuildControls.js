@@ -3,6 +3,8 @@ import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import { makeStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
+import { connect } from "react-redux";
+import { addIng, removeIng } from "../../../ReduxPlayground/Actions/actions_creator";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -70,4 +72,11 @@ function BuildControls(props) {
   });
 }
 
-export default BuildControls;
+const mapDispatchToProps = (dispatch) => {
+  return {
+    addIng: (type) => dispatch(addIng(type)),
+    removeIng: (type) => dispatch(removeIng(type)),
+  };
+};
+
+export default connect(null, mapDispatchToProps)(BuildControls);

@@ -13,8 +13,11 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import MailIcon from "@material-ui/icons/Mail";
-import { Link, NavLink } from "react-router-dom";
-import "./Layout.css"
+import { NavLink } from "react-router-dom";
+import { connect } from "react-redux";
+import "./Layout.css";
+import { logout } from "../../ReduxPlayground/Actions/actions_creator";
+import { withRouter } from "react-router";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -34,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Layout() {
+function Layout(props) {
   const classes = useStyles();
 
   const [state, setState] = React.useState({
@@ -42,7 +45,6 @@ export default function Layout() {
   });
 
   const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
-
   //   const toggleDrawer = (open) => (event) => {
   //     // if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
   //     //   return;
@@ -57,6 +59,16 @@ export default function Layout() {
     });
   });
 
+  const onLogout = () => {
+    props.logout();
+    setState({ left: false });
+  };
+
+  const onItemClick = (item) => {
+    setState({ left: false });
+    props.history.push("/" + item);
+  };
+
   return (
     <div className={classes.root}>
       <React.Fragment>
@@ -64,10 +76,22 @@ export default function Layout() {
         <Drawer open={state.left} onClose={() => setState({ left: false })}>
           <div className={classes.list} role="presentation">
             <List>
+              {props.isAuth ? (
+                <ListItem
+                  button
+                  key={"user"}
+                  onClick={() => setState({ left: false })}
+                  style={{ color: "grey" }}
+                >
+                  <ListItemText primary={"Logged in as: " + props.email} />
+                </ListItem>
+              ) : (
+                ""
+              )}
               <ListItem
                 button
                 key={"Home"}
-                onClick={() => setState({ left: false })}
+                onClick={() => onItemClick('')}
               >
                 <ListItemIcon>
                   <MailIcon></MailIcon>
@@ -76,14 +100,33 @@ export default function Layout() {
               </ListItem>
               <ListItem
                 button
-                key={"burger-builder"}
-                onClick={() => setState({ left: false })}
+                key={"orders"}
+                onClick={() => onItemClick('orders')}
               >
                 <ListItemIcon>
                   <MailIcon></MailIcon>
                 </ListItemIcon>
-                <ListItemText primary={"Burger Builder"} />
+                <ListItemText primary={"Orders"} />
               </ListItem>
+              {props.isAuth ? (
+                <ListItem button key={"logout"} onClick={onLogout}>
+                  <ListItemIcon>
+                    <MailIcon></MailIcon>
+                  </ListItemIcon>
+                  <ListItemText primary={"Logout"} />
+                </ListItem>
+              ) : (
+                <ListItem
+                  button
+                  key={"login"}
+                  onClick={() => onItemClick('auth')}
+                >
+                  <ListItemIcon>
+                    <MailIcon></MailIcon>
+                  </ListItemIcon>
+                  <ListItemText primary={"Login"} />
+                </ListItem>
+              )}
             </List>
             <Divider />
           </div>
@@ -110,13 +153,40 @@ export default function Layout() {
           </Typography>
           {windowWidth > 600 && (
             <React.Fragment>
-            
-                <NavLink className = "myLink" to="/" exact>  <Button color="inherit">Home </Button></NavLink>
-              
+              <NavLink className="myLink" to="/" exact>
+                {" "}
+                <Button color="inherit">Home </Button>
+              </NavLink>
+
               {/* <Button color="inherit"><NavLink to ={{pathname : "/", search : "query=1"}}>Burger Builder</NavLink></Button> */}
+              {/* <Button color="inherit">
+                <NavLink className="myLink" to="/burger" exact>
+                  Burger Builder
+                </NavLink>
+              </Button> */}
               <Button color="inherit">
-                <NavLink className = "myLink" to="/burger" exact >Burger Builder</NavLink>
+                <NavLink className="myLink" to="/orders" exact>
+                  Orders
+                </NavLink>
               </Button>
+              {props.isAuth ? (
+                <React.Fragment>
+                  <Button color="inherit">
+                    <a>({props.email})</a>
+                  </Button>
+                  <Button color="inherit">
+                    <a className="myLink" onClick={props.logout}>
+                      Logout
+                    </a>
+                  </Button>
+                </React.Fragment>
+              ) : (
+                <Button color="inherit">
+                  <NavLink className="myLink" to="/auth">
+                    Login
+                  </NavLink>
+                </Button>
+              )}
             </React.Fragment>
           )}
         </Toolbar>
@@ -124,3 +194,18 @@ export default function Layout() {
     </div>
   );
 }
+
+const MapStateToProps = (state) => {
+  return {
+    isAuth: Object.keys(state.auth.userData).length != 0,
+    email: state.auth.userData.email,
+  };
+};
+
+const MapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    logout: () => dispatch(logout(ownProps)),
+  };
+};
+
+export default withRouter(connect(MapStateToProps, MapDispatchToProps)(Layout));

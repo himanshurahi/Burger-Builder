@@ -4,9 +4,10 @@ import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import axios from "axios";
 import { withRouter } from "react-router-dom";
+import { connect } from "react-redux";
+import { makeOrder } from "../../../../ReduxPlayground/Actions/actions_creator";
 
 function Basic(props) {
-  console.log(props);
   return (
     <div style={{ marginTop: "20px" }}>
       <Formik
@@ -38,21 +39,14 @@ function Basic(props) {
           return errors;
         }}
         onSubmit={(values, { setSubmitting }) => {
-          setSubmitting(true);
-          let finalData = { ...values, ...props.data };
-          axios
-            .post(
-              "https://burger-builder-374c1.firebaseio.com/orders.json",
-              finalData
-            )
-            .then((data) => {
-              setSubmitting(false);
-              props.history.push({
-                  pathname : "/thank-you",
-                  state : {...props.data}
-              });
-              console.log(data);
-            });
+          //   setSubmitting(true);
+          let finalData = {
+            ...values,
+            ...props.ing,
+            email: props.userData.email,
+            uid: props.userData.uid,
+          };
+          props.makeOrder(finalData);
         }}
       >
         {({
@@ -116,7 +110,7 @@ function Basic(props) {
 
             <Button
               type="submit"
-              disabled={!(isValid && dirty) || isSubmitting}
+              disabled={!(isValid && dirty) || props.ing.loading}
               variant="contained"
               color="primary"
             >
@@ -132,4 +126,14 @@ function Basic(props) {
   );
 }
 
-export default withRouter(Basic);
+const mapStateToProps = (state) => {
+  return { ing: state.burger, userData: state.auth.userData };
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    makeOrder: (data) => dispatch(makeOrder(data, ownProps)),
+  };
+};
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Basic));

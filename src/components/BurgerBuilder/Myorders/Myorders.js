@@ -6,6 +6,8 @@ import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import axios from "axios";
 import Spinner from "../spinner/spinner";
+import { connect } from "react-redux";
+import { FetchOrders } from "../../../ReduxPlayground/Actions/actions_creator";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -39,24 +41,17 @@ function Myorders(props) {
   //   const [Input, SetInput] = useState({ inputs: ["input-0"] });
 
   React.useEffect(() => {
-    fetchData();
+    // fetchData();
+    props.fetchOrders(props.userId);
+
+    return () => {
+      console.log("My Orders Unmount");
+    };
   }, []);
 
-  let fetchedArray = [];
   const fetchData = () => {
-    setLoading(true);
-    axios
-      .get("https://burger-builder-374c1.firebaseio.com/orders.json")
-      .then((data) => {
-        for (let key in data.data) {
-          fetchedArray.push({ id: key, ...data.data[key] });
-        }
-        setIng(fetchedArray);
-        setLoading(false);
-      });
-
-    console.log(ing && ing.length);
-
+    // setLoading(true);
+    // console.log(ing && ing.length);
     // console.log(showArray);
   };
 
@@ -74,15 +69,15 @@ function Myorders(props) {
     <Container maxWidth="lg" style={{ marginTop: "20px" }}>
       <div>
         <Grid container spacing={3}>
-          {!loading ? (
-            ing.length == 0 ? (
+          {!props.orders.loading ? (
+            props.orders.orders.length == 0 ? (
               <Grid item lg={12} sm={12} xs={12}>
                 <Paper className={classes.paper} elevation={3}>
                   <h4>No Orders Found :(</h4>
                 </Paper>
               </Grid>
             ) : (
-              ing.map((i, index) => {
+              props.orders.orders.map((i, index) => {
                 return (
                   <Grid item lg={12} sm={12} xs={12} key={index}>
                     <Paper
@@ -147,4 +142,18 @@ function Myorders(props) {
 // </Grid>
 //   );
 
-export default Myorders;
+const MapStateToProps = (state) => {
+  return {
+    orders: state.orders,
+    isAuth: Object.keys(state.auth.userData).length != 0,
+    userId: state.auth.userData.uid,
+  };
+};
+
+const MapDispatchToProps = (dispatch) => {
+  return {
+    fetchOrders: (userId) => dispatch(FetchOrders(userId)),
+  };
+};
+
+export default connect(MapStateToProps, MapDispatchToProps)(Myorders);
